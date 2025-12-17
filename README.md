@@ -1,21 +1,28 @@
 # FastAPI 用户管理系统
 
-基于内存的用户增删改查（CRUD）API
+基于 **SQLite 数据库** 的用户增删改查（CRUD）API
 
 ## 环境要求
 
 - Python 3.11
 - pip (Python包管理器)
+- SQLite（Python内置，无需单独安装）
 
 ## 项目结构
 
 ```
 fastapi-user/
-├── fastapi-user/
-│   ├── main.py           # 主应用文件
-│   └── requirements.txt  # 依赖包列表
-├── test_api.py          # API测试脚本
-└── README.md            # 项目说明文档
+├── db/                      # 数据库模块
+│   ├── __init__.py         # 包初始化文件
+│   ├── database.py         # 数据库连接配置
+│   └── model.py            # ORM数据模型
+├── fastapi-user-main/       # 主应用目录
+│   ├── main.py             # FastAPI应用主文件
+│   └── requirements.txt    # 项目依赖
+├── init_db.py              # 数据库初始化脚本
+├── test_api.py             # API测试脚本
+├── users.db                # SQLite数据库文件（运行后自动生成）
+└── README.md               # 项目说明文档
 ```
 
 ## 🚀 快速开始
@@ -25,24 +32,73 @@ fastapi-user/
 conda activate py311
 
 # 2. 进入项目目录
-cd fastapi-user/fastapi-user-main
+cd D:\aproduct\fastapi-user
 
 # 3. 安装依赖
+cd fastapi-user-main
 pip install -r requirements.txt
 
-# 4. 运行应用
+# 4. （可选）初始化数据库并插入测试数据
+cd ..
+python init_db.py
+
+# 5. 运行应用
+cd fastapi-user-main
 python -m uvicorn main:app --reload
 
-# 5. 访问API文档
-# 浏览器打开: http://localhost:8000/docs
+# 6. 访问API文档
+# 浏览器打开: http://127.0.0.1:8000/docs
+```
+
+## 💾 数据库说明
+
+### 数据库类型
+- **SQLite**：轻量级文件数据库，无需额外安装和配置
+- **数据库文件**：`users.db`（自动创建在项目根目录）
+- **ORM框架**：SQLAlchemy 2.0
+
+### 数据库表结构
+
+**表名：** `users`
+
+| 字段名 | 类型 | 说明 | 约束 |
+|--------|------|------|------|
+| id | INTEGER | 用户ID | 主键、自增 |
+| name | VARCHAR(100) | 用户姓名 | 非空 |
+| email | VARCHAR(255) | 用户邮箱 | 非空、唯一、索引 |
+| age | INTEGER | 用户年龄 | 可空 |
+| created_at | DATETIME | 创建时间 | 自动生成 |
+| updated_at | DATETIME | 更新时间 | 自动更新 |
+
+### 初始化数据库
+
+首次运行或需要重置数据库时：
+
+```bash
+python init_db.py
+```
+
+该脚本会：
+1. 创建数据库表结构
+2. （可选）清空现有数据
+3. 插入测试数据（张三、李四、王五、赵六）
 ```
 
 ## 运行应用
 
+**方法1：直接运行（推荐）**
+```bash
+cd fastapi-user-main
+python main.py
+```
+
+**方法2：使用uvicorn**
+```bash
+cd fastapi-user-main
 python -m uvicorn main:app --reload
 ```
 
-应用将在 http://localhost:8000 启动
+应用将在 http://127.0.0.1:8000 启动
 
 ## API 文档
 
@@ -209,6 +265,36 @@ python -m uvicorn main:app --reload
 }
 ```
 
+---
+
+### 7. 获取用户统计 🆕
+**GET** `/stats/count`
+
+**响应 (200 OK)：**
+```json
+{
+  "total_users": 10
+}
+```
+
+### 🔍 分页查询
+
+获取所有用户接口支持分页参数：
+
+**GET** `/users/?skip=0&limit=10`
+
+- `skip`：跳过前N条记录（默认0）
+- `limit`：返回最多N条记录（默认100）
+
+**示例：**
+```bash
+# 获取第1-10条用户
+GET /users/?skip=0&limit=10
+
+# 获取第11-20条用户
+GET /users/?skip=10&limit=10
+```
+
 ## 示例使用
 
 ### 方式1：使用测试脚本（推荐）
@@ -281,19 +367,50 @@ print(response.json())
 
 ## 功能特性
 
+### 🎯 核心功能
 - ✅ 创建用户（自动生成ID和创建时间）
-- ✅ 获取所有用户列表
+- ✅ 获取所有用户列表（支持分页）
 - ✅ 根据ID获取单个用户
 - ✅ 更新用户信息（支持部分更新）
 - ✅ 删除用户
-- ✅ 邮箱唯一性验证
-- ✅ 邮箱格式验证
 - ✅ 根据邮箱搜索用户
-- ✅ 完整的错误处理（404、400等）
+- ✅ 获取用户统计信息
+
+### 🛡️ 数据验证
+- ✅ 邮箱唯一性验证（数据库级别）
+- ✅ 邮箱格式验证（Pydantic）
+- ✅ 字段类型验证
+- ✅ 完整的错误处理（404、400、422等）
+
+### 💾 数据库特性
+- ✅ **SQLite持久化存储**（数据不会丢失）
+- ✅ SQLAlchemy ORM（对象关系映射）
+- ✅ 自动创建/更新时间戳
+- ✅ 数据库索引优化（email字段）
+- ✅ 事务管理和回滚
+- ✅ 数据库会话管理（依赖注入）
+
+### 📊 其他特性
+- ✅ 交互式API文档（Swagger UI）
+- ✅ 完整的类型注解
+- ✅ RESTful API设计
+- ✅ 分页查询支持
 
 ## ⚠️ 注意事项
 
-此应用使用内存存储数据，重启应用后数据会丢失。如需持久化存储，请考虑使用数据库（如 SQLite、PostgreSQL、MySQL 等）。
+### 数据持久化
+- ✅ **本项目已使用SQLite数据库**，数据会持久化保存在 `users.db` 文件中
+- ✅ 重启应用后数据**不会丢失**
+- ✅ 删除 `users.db` 文件可以清空所有数据
+
+### 生产环境建议
+如需部署到生产环境，建议：
+1. 使用 PostgreSQL 或 MySQL 替代 SQLite
+2. 添加用户认证和授权机制
+3. 配置HTTPS
+4. 添加日志记录
+5. 配置CORS（跨域资源共享）
+6. 添加数据备份策略
 
 ## ❓ 常见问题
 
@@ -338,10 +455,36 @@ pip install fastapi uvicorn[standard] pydantic[email] requests
 
 ### 5. 数据保存在哪里？
 
-数据存储在内存中（Python字典），重启后会清空。这是设计的教学示例，如需持久化可以：
-- 使用 SQLite 数据库（轻量级，无需额外服务）
-- 使用 PostgreSQL/MySQL（生产环境）
-- 使用 Redis（缓存场景）
+数据保存在 **SQLite 数据库文件** 中：
+- **文件位置：** 项目根目录下的 `users.db`
+- **持久化：** 重启应用后数据不会丢失
+- **查看数据：** 可以使用 SQLite 客户端工具查看
+  - [DB Browser for SQLite](https://sqlitebrowser.org/)（推荐）
+  - [SQLite Viewer](https://inloop.github.io/sqlite-viewer/)（在线）
+
+**清空数据库：**
+```bash
+# 方法1: 删除数据库文件（应用会自动重建）
+del users.db  # Windows
+rm users.db   # Linux/Mac
+
+# 方法2: 运行初始化脚本并选择清空
+python init_db.py
+```
+
+### 5.1 如何切换到其他数据库？
+
+修改 `db/database.py` 中的连接字符串：
+
+**PostgreSQL：**
+```python
+SQLALCHEMY_DATABASE_URL = "postgresql://user:password@localhost/dbname"
+```
+
+**MySQL：**
+```python
+SQLALCHEMY_DATABASE_URL = "mysql+pymysql://user:password@localhost/dbname"
+```
 
 ### 6. 如何允许外网访问？
 

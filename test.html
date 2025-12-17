@@ -1,0 +1,660 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理系统 - 测试页面</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+
+        .auth-status {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .auth-status.logged-in {
+            background: #d4edda;
+            border-left: 4px solid #28a745;
+        }
+
+        .auth-status.logged-out {
+            background: #f8d7da;
+            border-left: 4px solid #dc3545;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 1.5em;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        button {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            width: 100%;
+        }
+
+        button:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        button.secondary {
+            background: #6c757d;
+        }
+
+        button.secondary:hover {
+            background: #5a6268;
+        }
+
+        button.danger {
+            background: #dc3545;
+        }
+
+        button.danger:hover {
+            background: #c82333;
+        }
+
+        .output {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 15px;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .output.success {
+            background: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .output.error {
+            background: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .button-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .full-width-card {
+            grid-column: 1 / -1;
+        }
+
+        .user-item {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border-left: 3px solid #667eea;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 3px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge.active {
+            background: #28a745;
+            color: white;
+        }
+
+        .badge.inactive {
+            background: #dc3545;
+            color: white;
+        }
+
+        .config {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        .config input {
+            padding: 8px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            margin-right: 10px;
+            width: 300px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 15px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-box .label {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 用户管理系统测试页面</h1>
+            <p>基于 FastAPI + JWT 认证</p>
+        </div>
+
+        <!-- API配置 -->
+        <div class="config">
+            <label><strong>API 地址：</strong></label>
+            <input type="text" id="apiBase" value="http://127.0.0.1:8000">
+            <button onclick="updateApiBase()" style="width: auto; padding: 8px 16px;">更新</button>
+        </div>
+
+        <!-- 认证状态 -->
+        <div class="auth-status" id="authStatus">
+            <strong>状态：</strong><span id="statusText">未登录</span>
+            <span id="userInfo"></span>
+            <button onclick="logout()" id="logoutBtn" style="display: none; width: auto; float: right; padding: 8px 16px;">退出登录</button>
+        </div>
+
+        <!-- 主要功能区域 -->
+        <div class="grid">
+            <!-- 用户注册 -->
+            <div class="card">
+                <h2>📝 用户注册</h2>
+                <div class="form-group">
+                    <label>姓名</label>
+                    <input type="text" id="regName" placeholder="请输入姓名">
+                </div>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="regEmail" placeholder="example@email.com">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="regPassword" placeholder="至少6个字符">
+                </div>
+                <div class="form-group">
+                    <label>年龄（可选）</label>
+                    <input type="number" id="regAge" placeholder="请输入年龄">
+                </div>
+                <button onclick="register()">注册</button>
+                <div class="output" id="regOutput"></div>
+            </div>
+
+            <!-- 用户登录 -->
+            <div class="card">
+                <h2>🔐 用户登录</h2>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="loginEmail" placeholder="example@email.com">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码">
+                </div>
+                <button onclick="login()">登录</button>
+                <div class="output" id="loginOutput"></div>
+            </div>
+
+            <!-- 获取当前用户信息 -->
+            <div class="card">
+                <h2>👤 我的信息</h2>
+                <button onclick="getCurrentUser()">获取我的信息</button>
+                <div class="output" id="currentUserOutput"></div>
+            </div>
+
+            <!-- 更新当前用户信息 -->
+            <div class="card">
+                <h2>✏️ 更新我的信息</h2>
+                <div class="form-group">
+                    <label>新姓名（可选）</label>
+                    <input type="text" id="updateName" placeholder="留空则不修改">
+                </div>
+                <div class="form-group">
+                    <label>新邮箱（可选）</label>
+                    <input type="email" id="updateEmail" placeholder="留空则不修改">
+                </div>
+                <div class="form-group">
+                    <label>新年龄（可选）</label>
+                    <input type="number" id="updateAge" placeholder="留空则不修改">
+                </div>
+                <div class="form-group">
+                    <label>新密码（可选）</label>
+                    <input type="password" id="updatePassword" placeholder="留空则不修改">
+                </div>
+                <button onclick="updateCurrentUser()">更新信息</button>
+                <div class="output" id="updateOutput"></div>
+            </div>
+
+            <!-- 删除当前用户 -->
+            <div class="card">
+                <h2>🗑️ 删除账号</h2>
+                <p style="color: #dc3545; margin-bottom: 15px;">⚠️ 此操作不可恢复！</p>
+                <button class="danger" onclick="deleteCurrentUser()">删除我的账号</button>
+                <div class="output" id="deleteOutput"></div>
+            </div>
+
+            <!-- 搜索用户 -->
+            <div class="card">
+                <h2>🔍 搜索用户</h2>
+                <div class="form-group">
+                    <label>邮箱</label>
+                    <input type="email" id="searchEmail" placeholder="输入要搜索的邮箱">
+                </div>
+                <button onclick="searchUserByEmail()">搜索</button>
+                <div class="output" id="searchOutput"></div>
+            </div>
+        </div>
+
+        <!-- 全宽卡片 -->
+        <div class="grid">
+            <!-- 获取所有用户 -->
+            <div class="card full-width-card">
+                <h2>👥 所有用户列表</h2>
+                <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+                    <input type="number" id="userSkip" placeholder="跳过记录数" value="0" style="width: 150px; padding: 8px;">
+                    <input type="number" id="userLimit" placeholder="限制记录数" value="10" style="width: 150px; padding: 8px;">
+                    <button onclick="getAllUsers()" style="width: auto; padding: 8px 24px;">获取用户列表</button>
+                </div>
+                <div class="output" id="usersOutput"></div>
+            </div>
+
+            <!-- 用户统计 -->
+            <div class="card full-width-card">
+                <h2>📊 用户统计</h2>
+                <button onclick="getUserStats()">获取统计信息</button>
+                <div id="statsOutput"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // API基础地址
+        let API_BASE = 'http://127.0.0.1:8000';
+
+        // 获取token
+        function getToken() {
+            return localStorage.getItem('token');
+        }
+
+        // 保存token
+        function saveToken(token) {
+            localStorage.setItem('token', token);
+            updateAuthStatus();
+        }
+
+        // 清除token
+        function clearToken() {
+            localStorage.removeItem('token');
+            updateAuthStatus();
+        }
+
+        // 更新API基础地址
+        function updateApiBase() {
+            API_BASE = document.getElementById('apiBase').value;
+            alert('API地址已更新为: ' + API_BASE);
+        }
+
+        // 更新认证状态显示
+        function updateAuthStatus() {
+            const token = getToken();
+            const statusDiv = document.getElementById('authStatus');
+            const statusText = document.getElementById('statusText');
+            const userInfo = document.getElementById('userInfo');
+            const logoutBtn = document.getElementById('logoutBtn');
+
+            if (token) {
+                statusDiv.className = 'auth-status logged-in';
+                statusText.textContent = '✅ 已登录';
+                userInfo.textContent = ' (Token已保存)';
+                logoutBtn.style.display = 'inline-block';
+            } else {
+                statusDiv.className = 'auth-status logged-out';
+                statusText.textContent = '❌ 未登录';
+                userInfo.textContent = '';
+                logoutBtn.style.display = 'none';
+            }
+        }
+
+        // 退出登录
+        function logout() {
+            if (confirm('确定要退出登录吗？')) {
+                clearToken();
+                alert('已退出登录');
+            }
+        }
+
+        // 发起API请求
+        async function apiRequest(url, method = 'GET', data = null, requireAuth = false) {
+            const options = {
+                method: method,
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            };
+
+            if (requireAuth) {
+                const token = getToken();
+                if (!token) {
+                    throw new Error('未登录，请先登录获取token');
+                }
+                options.headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            if (data) {
+                options.body = JSON.stringify(data);
+            }
+
+            const response = await fetch(`${API_BASE}${url}`, options);
+            
+            if (!response.ok) {
+                const error = await response.json();
+                throw new Error(error.detail || '请求失败');
+            }
+
+            if (response.status === 204) {
+                return null;
+            }
+
+            return await response.json();
+        }
+
+        // 显示输出
+        function showOutput(elementId, content, isError = false) {
+            const element = document.getElementById(elementId);
+            element.className = 'output ' + (isError ? 'error' : 'success');
+            element.textContent = typeof content === 'string' ? content : JSON.stringify(content, null, 2);
+        }
+
+        // ========== 用户注册 ==========
+        async function register() {
+            try {
+                const name = document.getElementById('regName').value;
+                const email = document.getElementById('regEmail').value;
+                const password = document.getElementById('regPassword').value;
+                const age = document.getElementById('regAge').value;
+
+                if (!name || !email || !password) {
+                    throw new Error('请填写姓名、邮箱和密码');
+                }
+
+                const data = { name, email, password };
+                if (age) data.age = parseInt(age);
+
+                const result = await apiRequest('/auth/register', 'POST', data);
+                showOutput('regOutput', '✅ 注册成功！\n' + JSON.stringify(result, null, 2));
+                
+                // 清空表单
+                document.getElementById('regName').value = '';
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regAge').value = '';
+            } catch (error) {
+                showOutput('regOutput', '❌ 注册失败：' + error.message, true);
+            }
+        }
+
+        // ========== 用户登录 ==========
+        async function login() {
+            try {
+                const email = document.getElementById('loginEmail').value;
+                const password = document.getElementById('loginPassword').value;
+
+                if (!email || !password) {
+                    throw new Error('请填写邮箱和密码');
+                }
+
+                const result = await apiRequest('/auth/login', 'POST', { email, password });
+                
+                // 保存token
+                saveToken(result.access_token);
+                
+                showOutput('loginOutput', '✅ 登录成功！\n\n用户信息：\n' + JSON.stringify(result.user, null, 2) + '\n\nToken已自动保存到 localStorage');
+            } catch (error) {
+                showOutput('loginOutput', '❌ 登录失败：' + error.message, true);
+            }
+        }
+
+        // ========== 获取当前用户信息 ==========
+        async function getCurrentUser() {
+            try {
+                const result = await apiRequest('/users/me', 'GET', null, true);
+                showOutput('currentUserOutput', '✅ 获取成功！\n' + JSON.stringify(result, null, 2));
+            } catch (error) {
+                showOutput('currentUserOutput', '❌ 获取失败：' + error.message, true);
+            }
+        }
+
+        // ========== 更新当前用户信息 ==========
+        async function updateCurrentUser() {
+            try {
+                const name = document.getElementById('updateName').value;
+                const email = document.getElementById('updateEmail').value;
+                const age = document.getElementById('updateAge').value;
+                const password = document.getElementById('updatePassword').value;
+
+                const data = {};
+                if (name) data.name = name;
+                if (email) data.email = email;
+                if (age) data.age = parseInt(age);
+                if (password) data.password = password;
+
+                if (Object.keys(data).length === 0) {
+                    throw new Error('请至少填写一个要更新的字段');
+                }
+
+                const result = await apiRequest('/users/me', 'PUT', data, true);
+                showOutput('updateOutput', '✅ 更新成功！\n' + JSON.stringify(result, null, 2));
+                
+                // 清空表单
+                document.getElementById('updateName').value = '';
+                document.getElementById('updateEmail').value = '';
+                document.getElementById('updateAge').value = '';
+                document.getElementById('updatePassword').value = '';
+            } catch (error) {
+                showOutput('updateOutput', '❌ 更新失败：' + error.message, true);
+            }
+        }
+
+        // ========== 删除当前用户 ==========
+        async function deleteCurrentUser() {
+            if (!confirm('⚠️ 确定要删除您的账号吗？此操作不可恢复！')) {
+                return;
+            }
+
+            try {
+                await apiRequest('/users/me', 'DELETE', null, true);
+                showOutput('deleteOutput', '✅ 账号已删除');
+                clearToken();
+            } catch (error) {
+                showOutput('deleteOutput', '❌ 删除失败：' + error.message, true);
+            }
+        }
+
+        // ========== 获取所有用户 ==========
+        async function getAllUsers() {
+            try {
+                const skip = document.getElementById('userSkip').value || 0;
+                const limit = document.getElementById('userLimit').value || 10;
+                
+                const result = await apiRequest(`/users?skip=${skip}&limit=${limit}`, 'GET', null, true);
+                
+                let output = `✅ 获取成功！共 ${result.length} 条记录\n\n`;
+                result.forEach((user, index) => {
+                    output += `【用户 ${index + 1}】\n`;
+                    output += `  ID: ${user.id}\n`;
+                    output += `  姓名: ${user.name}\n`;
+                    output += `  邮箱: ${user.email}\n`;
+                    output += `  年龄: ${user.age || '未设置'}\n`;
+                    output += `  状态: ${user.is_active ? '✅ 活跃' : '❌ 禁用'}\n`;
+                    output += `  创建时间: ${user.created_at}\n`;
+                    output += `\n`;
+                });
+                
+                showOutput('usersOutput', output);
+            } catch (error) {
+                showOutput('usersOutput', '❌ 获取失败：' + error.message, true);
+            }
+        }
+
+        // ========== 搜索用户 ==========
+        async function searchUserByEmail() {
+            try {
+                const email = document.getElementById('searchEmail').value;
+                
+                if (!email) {
+                    throw new Error('请输入要搜索的邮箱');
+                }
+                
+                const result = await apiRequest(`/users/search/by-email?email=${encodeURIComponent(email)}`, 'GET', null, true);
+                showOutput('searchOutput', '✅ 找到用户！\n' + JSON.stringify(result, null, 2));
+            } catch (error) {
+                showOutput('searchOutput', '❌ 搜索失败：' + error.message, true);
+            }
+        }
+
+        // ========== 获取用户统计 ==========
+        async function getUserStats() {
+            try {
+                const result = await apiRequest('/stats', 'GET', null, true);
+                
+                const statsDiv = document.getElementById('statsOutput');
+                statsDiv.innerHTML = `
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="number">${result.total_users}</div>
+                            <div class="label">总用户数</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="number">${result.active_users}</div>
+                            <div class="label">活跃用户</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="number">${result.inactive_users}</div>
+                            <div class="label">禁用用户</div>
+                        </div>
+                    </div>
+                `;
+            } catch (error) {
+                showOutput('statsOutput', '❌ 获取失败：' + error.message, true);
+            }
+        }
+
+        // 页面加载时更新认证状态
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAuthStatus();
+        });
+    </script>
+</body>
+</html>
+
